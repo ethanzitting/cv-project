@@ -7,29 +7,40 @@ export default class Section extends Component {
     super(props);
 
     this.state = {
-      tempSkill: "",
-      skills: [
-      ],
+      tempTitle: "",
     }
   }
 
   render() {
-    const section = this.props.section;
-
+    const section = this.props.sectionObj;
+    
     const subsections = [];
 
     if (section.subsections) {
       for (let i = 0; i < section.subsections.length; i++) {
-        subsections.push(<Subsection key={uniqid()} subsection={section.subsections[i]} />)
+        subsections.push(<Subsection 
+          key={uniqid()} 
+          sectionObj={this.props.sectionObj} 
+          subsectionObj={this.props.sectionObj.subsections[i]} 
+          addBullet={this.props.addBullet}
+          editSubsection={this.props.editSubsection} 
+          editBullet={this.props.editBullet}/>)
       }
-    }
+    }    
 
     return (
       <div className="row">
-        <h3>{section.title}</h3>
+        <h3>
+          {section.title}
+          <button onClick={this.makeChangeable}>
+            <img src="./images/write.svg" alt="edit icon"/>
+          </button>
+        </h3>
         <div className="container-fluid">
           {subsections}
         </div>
+        <button onClick={() => this.props.addSubsection(this.props.sectionObj)}>Add Subsection</button>
+        <hr />
       </div>
     )
   }

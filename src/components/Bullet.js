@@ -6,44 +6,40 @@ export default class Bullet extends Component {
 
     this.state = {
       editable: false,
-      tempValue: '',
     }
 
     this.makeChangeable = this.makeChangeable.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.saveChange = this.saveChange.bind(this);
+    this.submitEdit = this.submitEdit.bind(this);
   }
 
   makeChangeable = () => {
+    console.log('makeChangeable fired.')
     this.setState({
       editable: true,
     })
   }
 
-  handleChange = (e) => {
-    this.setState({
-      tempValue: e.target.value,
-    });
-    console.log(this.state.tempValue);
-  }
-
-  saveChange = (e) => {
+  submitEdit = (e) => {
+    e.preventDefault();
     // Set the new props
-    this.props.submitChange(e.target.value);
+    this.props.editBullet(
+      this.props.sectionObj, 
+      this.props.subsectionObj, 
+      this.props.subsectionObj.bullets[this.props.subsectionObj.bullets.indexOf(this.props.description)], 
+      e.target.elements[0].value
+    );
 
     this.setState({
       editable: false,
-      tempValue: '',
     })
   }
 
   render() {
-    if (this.editable) {
+    if (this.state.editable) {
       return (
         <div className="row">
-          <form onSubmit={this.saveChange}>
+          <form onSubmit={this.submitEdit}>
             <input
-              onChange={this.handleChange}
               placeholder={this.props.description}
               type="text"
             />

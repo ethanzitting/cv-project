@@ -10,19 +10,25 @@ export default class Subsection extends Component {
   }
 
   render() {
-    const bullets = this.props.subsection.bullets;
+    const bullets = this.props.subsectionObj.bullets;
     const bulletsJSX = [];
 
     if (bullets) {
       for (let i = 0; i < bullets.length; i++) {
-        bulletsJSX.push(<Bullet key={uniqid()} description={bullets[i]} onClick={() => this.props.submitChange()} />);
+        bulletsJSX.push(<Bullet 
+          key={uniqid()} description={bullets[i]} 
+          sectionObj={this.props.sectionObj} 
+          subsectionObj={this.props.subsectionObj} 
+          onClick={() => this.props.submitChange()} 
+          editBullet={this.props.editBullet} />);
       }
     }
 
     return (
       <div>
-        <strong>{this.props.subsection.title}</strong>
+        <strong>{this.props.subsectionObj.title}</strong>
         {bulletsJSX}
+        <button onClick={() => this.props.addBullet(this.props.sectionObj, this.props.subsectionObj)}>Add Bullet</button>
       </div>
     )
   }
