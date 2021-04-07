@@ -9,6 +9,27 @@ export default class Section extends Component {
     this.state = {
       tempTitle: "",
     }
+
+    this.makeEditable = this.makeEditable.bind(this);
+    this.submitEdit = this.submitEdit.bind(this);
+  }
+
+  makeEditable = () => {
+    console.log('makeEditable fired.');
+    this.setState({
+      editable: true,
+    })
+  }
+
+  submitEdit = (e) => {
+    e.preventDefault();
+    console.log('submitEdit fired');
+
+    this.props.editSection(this.props.sectionObj, e.target.elements[0].value);
+
+    this.setState({
+      editable: false,
+    })
   }
 
   render() {
@@ -26,22 +47,43 @@ export default class Section extends Component {
           editSubsection={this.props.editSubsection} 
           editBullet={this.props.editBullet}/>)
       }
-    }    
+    }
 
-    return (
-      <div className="row">
-        <h3>
-          {section.title}
-          <button onClick={this.makeChangeable}>
-            <img src="./images/write.svg" alt="edit icon"/>
-          </button>
-        </h3>
-        <div className="container-fluid">
-          {subsections}
+    if (this.state.editable) {
+      return (
+        <div className="row">
+          <h3>
+            <form onSubmit={this.submitEdit}>
+                <input
+                  placeholder={section.title}
+                  type="text"
+                />
+                <button className="inline-button" type="submit"><img src="./images/save.svg" alt="save icon"/></button>
+            </form>
+          </h3>
+          <div className="container-fluid">
+            {subsections}
+          </div>
+          <button onClick={() => this.props.addSubsection(this.props.sectionObj)}>Add Subsection</button>
+          <hr />
         </div>
-        <button onClick={() => this.props.addSubsection(this.props.sectionObj)}>Add Subsection</button>
-        <hr />
-      </div>
-    )
+      )
+    } else {
+      return (
+        <div className="row">
+          <h3>
+            {section.title}
+            <button onClick={this.makeEditable}>
+              <img src="./images/write.svg" alt="edit icon"/>
+            </button>
+          </h3>
+          <div className="container-fluid">
+            {subsections}
+          </div>
+          <button onClick={() => this.props.addSubsection(this.props.sectionObj)}>Add Subsection</button>
+          <hr />
+        </div>
+      )
+    }
   }
 }

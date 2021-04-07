@@ -43,17 +43,18 @@ export default class Bullet extends Component {
               placeholder={this.props.description}
               type="text"
             />
-            <button type="submit"><img src="./images/save.svg" alt="save icon"/></button>
+            <button className="inline-button" type="submit"><img src="./images/save.svg" alt="save icon"/></button>
           </form>
         </div>
       )
     } else {
         return (
         <div className="row">
-          {this.props.description}
-          <button onClick={this.makeChangeable}>
+          <p>{this.props.description}
+          <button className="inline-button" onClick={this.makeChangeable}>
             <img src="./images/write.svg" alt="edit icon"/>
           </button>
+          </p>
         </div>
       )
     }
