@@ -70,6 +70,8 @@ export default class EditableFields extends Component {
       }
     }
 
+    const isBullet = (inputString) => inputString.includes('bullet') ? true : false;
+
     const cookie = document.cookie;
     // First, split the cookie by ';' to get section strings
 
@@ -95,34 +97,33 @@ export default class EditableFields extends Component {
 
       // Loop through the array of key-value pairs to find the subsections
       for (let j = 0; j < processedCookies.sections[i].length; j++) {
-        // This stores the current key value pair to simplify my code
-        let thisKeyValueString = processedCookies.sections[i][j];
 
         // If we are at a subsection title...
-        if (isSubsectionTitle(thisKeyValueString)) {
-          console.log(`subsection title found: ${thisKeyValueString}`);
+        if (isSubsectionTitle(processedCookies.sections[i][j])) {
+          console.log(`subsection title found: ${processedCookies.sections[i][j]}`);
 
           // Extract the subsection Title
           processedCookies.sections[i].subsections[j] = {};
-          processedCookies.sections[i].subsections[j].title = extractValue(thisKeyValueString);
+          processedCookies.sections[i].subsections[j].title = extractValue(processedCookies.sections[i][j]);
 
           // Extract the subsection Key
-          processedCookies.sections[i].subsections[j].key = extractValue(thisKeyValueString);
+          processedCookies.sections[i].subsections[j].key = extractValue(processedCookies.sections[i][j + 1]);
           
           // Establish an array to store the bullets
           processedCookies.sections[i].subsections[j].bullets = [];
 
-          // Make the loop skip over the title and key we already extracted
-          j += 2;
           // Make a new loop that starts off where the old loop was and loops through all the bullets
-          for (let k = j; k < processedCookies.sections[i][k]; k++) {
+          for (let k = j; k < processedCookies.sections[i].length; k++) {
+            console.log(processedCookies.sections[i][k]);
             // If the current key-value pair is a bullet...
-            if (processedCookies.sections[i][k].includes('bullet')) {
-              console.log(`bullet found ${processedCookies.sectioons[i][k]}`)
+            if (isBullet(processedCookies.sections[i][k])) {
+              console.log(`bullet found ${processedCookies.sections[i][k]}`)
               // extract the bullet text and store it in the array.
               let bulletText = processedCookies.sections[i][k].split('-');
               bulletText = bulletText[1];
-              processedCookies.sections[i].subsections[j].bullets[k - 2] = bulletText;
+              console.log(processedCookies);
+              console.log(`i:${i} j:${j} k:${k}`);
+              processedCookies.sections[i].subsections[j].bullets[processedCookies.sections[i].subsections[j].bullets.length] = bulletText;
             } else {
               break;
             }
