@@ -17,9 +17,40 @@ export default class EditableFields extends Component {
           city: 'Colorado Springs, CO',
         }
       },
-      sections: [],
+      sections: [
+        {
+          key: uniqid(),
+          title: 'Skills',
+          subsections: [
+            {
+              title: 'Skill Title',
+              key: uniqid(),
+              bullets:[
+                'Skill Details',
+                'Skill Details',
+              ]
+            }
+          ]
+        },
+        {
+          key: uniqid(),
+          title: 'Work History',
+          subsections: [
+            {
+              title: 'Job Title',
+              key: uniqid(),
+              bullets:[
+                'Job Details',
+                'Job Details',
+              ]
+            }
+          ]
+        }
+      ],
     }
-
+    
+    this.useCookies = this.useCookies.bind(this);
+    this.updateCookies = this.updateCookies.bind(this);
     this.addBullet = this.addBullet.bind(this);
     this.addSubsection = this.addSubsection.bind(this);
     this.addSection = this.addSection.bind(this);
@@ -28,6 +59,123 @@ export default class EditableFields extends Component {
     this.editBullet = this.editBullet.bind(this);
   }
 
+  useCookies = () => {
+    const extractValue = (keyValueString) => keyValueString.split('-')[1];
+
+    const isSubsectionTitle = (inputString) => {
+      if (inputString.includes(`subsection`) && inputString.includes(`title`)) {
+        return extractValue(inputString);
+      } else {
+        return false;
+      }
+    }
+
+    const cookie = document.cookie;
+    // First, split the cookie by ';' to get section strings
+
+    let processedCookies = {};
+    processedCookies.sections = cookie.split(';');
+
+    // Then, split the cookie by ',' to get an array of key value pairs
+    for (let i = 0; i < processedCookies.sections.length; i++) {
+      processedCookies.sections[i] = processedCookies.sections[i].split(',');
+
+      // Extract the Section title
+      processedCookies.sections[i].title = extractValue(processedCookies.sections[i][0]);
+      // Remove the section title key-value pair
+      processedCookies.sections[i].splice(0, 1);
+
+      // Extract the Section Key
+      processedCookies.sections[i].key = extractValue(processedCookies.sections[i][0]);
+      // Remove the section key key-value pair
+      processedCookies.sections[i].splice(0,1);
+
+      // Establish the subsections array to store the extracted subsections
+      processedCookies.sections[i].subsections = [];
+
+      // Loop through the array of key-value pairs to find the subsections
+      for (let j = 0; j < processedCookies.sections[i].length; j++) {
+        // This stores the current key value pair to simplify my code
+        let thisKeyValueString = processedCookies.sections[i][j];
+
+        // If we are at a subsection title...
+        if (isSubsectionTitle(thisKeyValueString)) {
+          console.log(`subsection title found: ${thisKeyValueString}`);
+
+          // Extract the subsection Title
+          processedCookies.sections[i].subsections[j] = {};
+          processedCookies.sections[i].subsections[j].title = extractValue(thisKeyValueString);
+
+          // Extract the subsection Key
+          processedCookies.sections[i].subsections[j].key = extractValue(thisKeyValueString);
+          
+          // Establish an array to store the bullets
+          processedCookies.sections[i].subsections[j].bullets = [];
+
+          // Make the loop skip over the title and key we already extracted
+          j += 2;
+          // Make a new loop that starts off where the old loop was and loops through all the bullets
+          for (let k = j; k < processedCookies.sections[i][k]; k++) {
+            // If the current key-value pair is a bullet...
+            if (processedCookies.sections[i][k].includes('bullet')) {
+              console.log(`bullet found ${processedCookies.sectioons[i][k]}`)
+              // extract the bullet text and store it in the array.
+              let bulletText = processedCookies.sections[i][k].split('-');
+              bulletText = bulletText[1];
+              processedCookies.sections[i].subsections[j].bullets[k - 2] = bulletText;
+            } else {
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    console.log(processedCookies);
+    
+    // Then, construct from that array a section object
+
+    // Then, set state to match the section objects.
+  }
+
+  // Resets cookies to match current state
+  updateCookies = () => {
+    // Clear away all existing cookies
+    document.cookie = '';
+
+    // simplifies the following code
+    const sections = this.state.sections;
+    // iterates through the sections in state creating a cookie for each one.
+    for (let i = 0; i < sections.length; i++) {
+      let cookieString = '';
+      cookieString += `section${i}=`;
+      cookieString += `title-${sections[i].title},`;
+      cookieString += `key-${sections[i].key},`;
+
+      // simplifies the following code
+      const subsections = sections[i].subsections;
+      // iterates through all the subsections in each section, adding their info to the value string
+      for (let j = 0; j < subsections.length; j++) {
+        cookieString += `subsection${j}title-${subsections[j].title},`;
+        cookieString += `subsection${j}key-${subsections[j].key},`;
+        
+        // simplifies the following code
+        const bullets = subsections[j].bullets;
+        // iterates through all the bullets in each subsection, adding them to the string
+        for (let k = 0; k < bullets.length; k++) {
+          cookieString += `bullet${k}-${bullets[k]},`;
+        }
+      }
+
+      // Sets the cnew cookie to expire in a year
+      cookieString += `;max-age=31000000`;
+
+      // Adds the cookie string to the document cookies.
+      document.cookie = cookieString;
+    }
+
+    console.log('cookies updated');
+  }
   
   addBullet = (sectionObj, subsectionObj) => {
     const newState = Object.assign({}, this.state);
@@ -51,6 +199,8 @@ export default class EditableFields extends Component {
     ].bullets.push('Description');
 
     this.setState(newState);
+
+    this.updateCookies();
   }
   
   
@@ -68,6 +218,7 @@ export default class EditableFields extends Component {
     })
     this.setState(newState);
     
+    this.updateCookies();
   }
   
 
@@ -89,12 +240,14 @@ export default class EditableFields extends Component {
 
     newState.sections.push(newSection);
     this.setState(newState);
+    this.updateCookies();
   }
 
   editSection = (sectionObj, newTitle) => {
     const newState = Object.assign({}, this.state);
     newState.sections[newState.sections.indexOf(sectionObj)].title = newTitle;
     this.setState(newState);
+    this.updateCookies();
   }
 
   editSubsection = (sectionObj, subsectionObj, newTitle) => {
@@ -112,15 +265,10 @@ export default class EditableFields extends Component {
     ].title = newTitle;
 
     this.setState(newState);
+    this.updateCookies();
   }
 
-  editBullet = (sectionObj, subsectionObj, oldBullet, newBullet) => {
-    console.log('editBullet fired.');
-    console.log(sectionObj);
-    console.log(subsectionObj);
-    console.log(oldBullet);
-    console.log(newBullet);
-    
+  editBullet = (sectionObj, subsectionObj, oldBullet, newBullet) => {    
     const newState = Object.assign({}, this.state);
 
     // Enter the sections array in the master state...
@@ -141,13 +289,15 @@ export default class EditableFields extends Component {
       ].bullets.indexOf(oldBullet)
     // And set the new Bullet
     ] = newBullet;
-    console.log(newState);
+    
     this.setState(newState);
-    console.log(this.state);
+
+    this.updateCookies();
   }
 
   render() {
     const sectionsJSX = [];
+    this.useCookies();
 
     for (let i = 0; i < this.state.sections.length; i++) {
       sectionsJSX.push(<Section 
